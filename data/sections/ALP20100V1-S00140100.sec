@@ -1,0 +1,33 @@
+{
+    "prefix": "ALP20100V1",
+    "section_id": "00011400",
+    "condition_type": "SPACE",
+    "condition_val": 1,
+    "pages": [
+        {
+            "duration": 3100,
+            "items": [
+                {
+                    "code": "1014",
+                    "x": 0,
+                    "y": 0
+                }
+            ]
+        },
+        {
+            "duration": 3100,
+            "items": [
+                {
+                    "code": "0500",
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "code": "2000",
+                    "x": 25,
+                    "y": 0
+                }
+            ]
+        }
+    ]
+}

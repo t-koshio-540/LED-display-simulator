@@ -1,0 +1,9 @@
+{
+    "prefix": "JREKH110KM",
+    "name": "HIGH RAIL_デモモード",
+    "section_files": [
+        "JREKH110KM-S01000001.sec",
+        "JREKH110KM-S01000002.sec",
+        "JREKH110KM-S01000003.sec"
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "prefix": "JREKH110KM",
+    "section_id": "01000001",
+    "condition_type": "SPACE",
+    "condition_val": 1,
+    "pages": [
+        {
+            "duration": 2400,
+            "items": [
+                {
+                    "code": "0600",
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "code": "1231",
+                    "x": 56,
+                    "y": 0
+                }
+            ]
+        },
+        {
+            "duration": 4100,
+            "items": [
+                {
+                    "code": "0501",
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "code": "2003",
+                    "x": 36,
+                    "y": 0
+                }
+            ]
+        }
+    ]
+}
