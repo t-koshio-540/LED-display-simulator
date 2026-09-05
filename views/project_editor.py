@@ -11,7 +11,7 @@ class ProjectEditorWindow(tk.Toplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title("プロジェクト作成 / 編集")
-        self.geometry("600x450")
+        self.geometry("700x520")
 
         self.project = Project()
         self.preview_photo = None
@@ -30,6 +30,20 @@ class ProjectEditorWindow(tk.Toplevel):
         self.ent_name = tk.Entry(top_frame, width=20)
         self.ent_name.insert(0, "各駅停車")
         self.ent_name.grid(row=1, column=1, sticky="w")
+
+        # セクション検索エリア
+        search_frame = tk.LabelFrame(self, text="セクション検索", padx=5, pady=5)
+        search_frame.pack(fill=tk.X, padx=10, pady=2)
+
+        tk.Label(search_frame, text="接頭辞:").pack(side=tk.LEFT)
+        self.ent_search_prefix = tk.Entry(search_frame, width=12)
+        self.ent_search_prefix.pack(side=tk.LEFT, padx=5)
+        self.ent_search_prefix.bind("<KeyRelease>", lambda e: self.refresh_available_sections())
+
+        tk.Label(search_frame, text="その他キーワード:").pack(side=tk.LEFT, padx=(10, 0))
+        self.ent_search_keyword = tk.Entry(search_frame, width=15)
+        self.ent_search_keyword.pack(side=tk.LEFT, padx=5)
+        self.ent_search_keyword.bind("<KeyRelease>", lambda e: self.refresh_available_sections())
 
         mid_frame = tk.Frame(self)
         mid_frame.pack(expand=True, fill=tk.BOTH, padx=10, pady=5)
@@ -67,10 +81,21 @@ class ProjectEditorWindow(tk.Toplevel):
 
     def refresh_available_sections(self):
         self.lst_avail.delete(0, tk.END)
+        prefix_query = self.ent_search_prefix.get().strip().lower()
+        keyword_query = self.ent_search_keyword.get().strip().lower()
+
         if os.path.exists(SECTIONS_DIR):
             for f in os.listdir(SECTIONS_DIR):
                 if f.endswith(".sec"):
-                    self.lst_avail.insert(tk.END, f)
+                    parts = f.split("-", 1)
+                    sec_prefix = parts[0] if len(parts) > 0 else ""
+                    sec_rest = parts[1] if len(parts) > 1 else f
+
+                    match_prefix = (not prefix_query) or (prefix_query in sec_prefix.lower())
+                    match_keyword = (not keyword_query) or (keyword_query in sec_rest.lower())
+
+                    if match_prefix and match_keyword:
+                        self.lst_avail.insert(tk.END, f)
 
     def add_section(self):
         sel = self.lst_avail.curselection()

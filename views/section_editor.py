@@ -2,17 +2,17 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import ImageTk
 from models import Section, Page
-from utils import render_raw_page
+from utils import render_raw_page, parse_x_range, replace_x, replace_x_for_preview
 
 class SectionEditorWindow(tk.Toplevel):
     """ページ・セクション作成・編集ウィンドウ"""
     def __init__(self, parent):
         super().__init__(parent)
         self.title("セクション作成 / 編集")
-        self.geometry("850x600")
+        self.geometry("900x650")
 
         self.section = Section()
-        self.current_page_items = []  # 現在編集中のページの画像要素リスト
+        self.current_page_items = []
         self.preview_photo = None
         
         self.init_ui()
@@ -29,9 +29,10 @@ class SectionEditorWindow(tk.Toplevel):
         self.ent_prefix = tk.Entry(sec_frame, width=12)
         self.ent_prefix.insert(0, "AAABBBBBBB")
         self.ent_prefix.grid(row=0, column=1, sticky="w", padx=5)
+        self.ent_prefix.bind("<KeyRelease>", lambda e: self.update_preview())
 
-        tk.Label(sec_frame, text="セクションID (8桁):").grid(row=0, column=2, sticky="w")
-        self.ent_sec_id = tk.Entry(sec_frame, width=10)
+        tk.Label(sec_frame, text="セクションID (8桁/X可):").grid(row=0, column=2, sticky="w")
+        self.ent_sec_id = tk.Entry(sec_frame, width=12)
         self.ent_sec_id.insert(0, "00000001")
         self.ent_sec_id.grid(row=0, column=3, sticky="w", padx=5)
 
@@ -68,7 +69,7 @@ class SectionEditorWindow(tk.Toplevel):
         tk.Button(btn_page_box, text="選択ページ削除", command=self.delete_page, width=12).pack(pady=2)
 
         # 2. ページ詳細編集
-        page_edit_box = tk.LabelFrame(left_frame, text="ページの編集", padx=5, pady=5)
+        page_edit_box = tk.LabelFrame(left_frame, text="ページの編集 / 画像特定", padx=5, pady=5)
         page_edit_box.pack(fill=tk.BOTH, expand=True)
 
         dur_frame = tk.Frame(page_edit_box)
@@ -82,33 +83,45 @@ class SectionEditorWindow(tk.Toplevel):
         img_list_frame = tk.Frame(page_edit_box)
         img_list_frame.pack(fill=tk.BOTH, expand=True, pady=2)
 
-        self.lst_items = tk.Listbox(img_list_frame, height=5)
+        self.lst_items = tk.Listbox(img_list_frame, height=4)
         self.lst_items.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         btn_img_box = tk.Frame(img_list_frame)
         btn_img_box.pack(side=tk.RIGHT, fill=tk.Y, padx=5)
         tk.Button(btn_img_box, text="画像取り消し", command=self.remove_image_item, width=12, bg="#ffcccc").pack(pady=2)
 
-        # 画像追加入力フォーム
+        # 単一画像追加 ＆ 一括登録エリア
         add_img_frame = tk.Frame(page_edit_box)
-        add_img_frame.pack(fill=tk.X, pady=5)
+        add_img_frame.pack(fill=tk.X, pady=2)
         
-        tk.Label(add_img_frame, text="コード(4桁):").pack(side=tk.LEFT)
-        self.ent_code = tk.Entry(add_img_frame, width=6)
+        tk.Label(add_img_frame, text="コード(4桁/X可):").grid(row=0, column=0, sticky="w")
+        self.ent_code = tk.Entry(add_img_frame, width=8)
         self.ent_code.insert(0, "0001")
-        self.ent_code.pack(side=tk.LEFT, padx=2)
+        self.ent_code.grid(row=0, column=1, padx=2, sticky="w")
+        self.ent_code.bind("<KeyRelease>", lambda e: self.update_preview())
 
-        tk.Label(add_img_frame, text="X:").pack(side=tk.LEFT)
+        tk.Label(add_img_frame, text="X:").grid(row=0, column=2, sticky="w")
         self.ent_x = tk.Entry(add_img_frame, width=4)
         self.ent_x.insert(0, "0")
-        self.ent_x.pack(side=tk.LEFT, padx=2)
+        self.ent_x.grid(row=0, column=3, padx=2, sticky="w")
 
-        tk.Label(add_img_frame, text="Y:").pack(side=tk.LEFT)
+        tk.Label(add_img_frame, text="Y:").grid(row=0, column=4, sticky="w")
         self.ent_y = tk.Entry(add_img_frame, width=4)
         self.ent_y.insert(0, "0")
-        self.ent_y.pack(side=tk.LEFT, padx=2)
+        self.ent_y.grid(row=0, column=5, padx=2, sticky="w")
 
-        tk.Button(add_img_frame, text="画像追加", command=self.add_image_item).pack(side=tk.LEFT, padx=5)
+        tk.Button(add_img_frame, text="画像追加", command=self.add_image_item).grid(row=0, column=6, padx=5)
+
+        # 一括登録用範囲指定行
+        batch_frame = tk.Frame(page_edit_box)
+        batch_frame.pack(fill=tk.X, pady=5)
+
+        tk.Label(batch_frame, text="Xの範囲 (例: 01-14,16,20-23):").pack(side=tk.LEFT)
+        self.ent_x_range = tk.Entry(batch_frame, width=22)
+        self.ent_x_range.pack(side=tk.LEFT, padx=5)
+        self.ent_x_range.bind("<KeyRelease>", lambda e: self.update_preview())
+
+        tk.Button(batch_frame, text="一括登録", command=self.batch_register, bg="#ffdd88").pack(side=tk.LEFT, padx=5)
 
         # --- 右側: プレビューエリア ---
         right_frame = tk.LabelFrame(mid_frame, text="プレビュー (等倍・LED加工なし)", padx=10, pady=10)
@@ -123,9 +136,10 @@ class SectionEditorWindow(tk.Toplevel):
 
         self.update_preview()
 
-    # 画像要素操作
     def add_image_item(self):
         code = self.ent_code.get()
+        range_str = self.ent_x_range.get()
+        final_code = replace_x_for_preview(code, range_str)
         try:
             x = int(self.ent_x.get())
             y = int(self.ent_y.get())
@@ -133,12 +147,11 @@ class SectionEditorWindow(tk.Toplevel):
             messagebox.showerror("エラー", "座標には整数を入力してください。")
             return
 
-        self.current_page_items.append({"code": code, "x": x, "y": y})
+        self.current_page_items.append({"code": final_code, "x": x, "y": y})
         self.refresh_item_listbox()
         self.update_preview()
 
     def remove_image_item(self):
-        """追加した画像を取り消す（選択要素の削除）"""
         sel = self.lst_items.curselection()
         if sel:
             idx = sel[0]
@@ -151,7 +164,56 @@ class SectionEditorWindow(tk.Toplevel):
         for item in self.current_page_items:
             self.lst_items.insert(tk.END, f"Code:{item['code']} (X:{item['x']}, Y:{item['y']})")
 
-    # ページ操作
+    def batch_register(self):
+        """Xの範囲指定に基づいて画像要素/ページ/セクションを一括生成"""
+        range_str = self.ent_x_range.get()
+        nums = parse_x_range(range_str)
+        if not nums:
+            messagebox.showerror("エラー", "有効なXの範囲を指定してください。(例: 01-14,16,20-23)")
+            return
+
+        code_pattern = self.ent_code.get()
+        sec_id_pattern = self.ent_sec_id.get()
+        prefix = self.ent_prefix.get()
+        
+        try:
+            dur = int(self.ent_duration.get())
+            x_pos = int(self.ent_x.get())
+            y_pos = int(self.ent_y.get())
+            cond_val = int(self.ent_cond_val.get())
+        except ValueError:
+            messagebox.showerror("エラー", "持続時間・座標・繰返回数には整数を入力してください。")
+            return
+
+        has_x_in_code = 'X' in code_pattern.upper()
+        has_x_in_sec_id = 'X' in sec_id_pattern.upper()
+
+        if has_x_in_sec_id:
+            count = 0
+            for val in nums:
+                cur_code = replace_x(code_pattern, val) if has_x_in_code else code_pattern
+                cur_sec_id = replace_x(sec_id_pattern, val)
+                
+                pg = Page(duration=dur, items=[{"code": cur_code, "x": x_pos, "y": y_pos}])
+                sec = Section(
+                    prefix=prefix,
+                    section_id=cur_sec_id,
+                    condition_type=self.cmb_cond.get(),
+                    condition_val=cond_val,
+                    pages=[pg]
+                )
+                sec.save()
+                count += 1
+            messagebox.showinfo("一括登録完了", f"{count} 件のセクションファイルを一括生成・保存しました。")
+        else:
+            for val in nums:
+                cur_code = replace_x(code_pattern, val) if has_x_in_code else code_pattern
+                pg = Page(duration=dur, items=[{"code": cur_code, "x": x_pos, "y": y_pos}])
+                self.section.pages.append(pg)
+            
+            self.refresh_page_listbox()
+            messagebox.showinfo("一括登録完了", f"{len(nums)} ページの画像を一括登録しました。")
+
     def add_page(self):
         try:
             dur = int(self.ent_duration.get())
@@ -207,13 +269,23 @@ class SectionEditorWindow(tk.Toplevel):
 
     def update_preview(self):
         prefix = self.ent_prefix.get()
-        img = render_raw_page(prefix, self.current_page_items)
+        range_str = self.ent_x_range.get()
+        
+        preview_items = []
+        for item in self.current_page_items:
+            code = replace_x_for_preview(item.get("code", "0000"), range_str)
+            preview_items.append({"code": code, "x": item.get("x", 0), "y": item.get("y", 0)})
+
+        img = render_raw_page(prefix, preview_items)
         self.preview_photo = ImageTk.PhotoImage(img)
         self.lbl_preview.config(image=self.preview_photo)
 
     def save_section(self):
         self.section.prefix = self.ent_prefix.get()
-        self.section.section_id = self.ent_sec_id.get()
+        sec_id_pattern = self.ent_sec_id.get()
+        range_str = self.ent_x_range.get()
+        self.section.section_id = replace_x_for_preview(sec_id_pattern, range_str)
+
         try:
             self.section.condition_val = int(self.ent_cond_val.get())
         except ValueError:
