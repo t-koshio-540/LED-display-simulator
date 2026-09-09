@@ -1,0 +1,10 @@
+{
+    "prefix": "JREE210ST1",
+    "name": "HB-E210系_デモモード",
+    "section_files": [
+        "JREE210ST1-S01220100.sec",
+        "JREE210ST1-S02012200.sec",
+        "JREE210ST1-S03011600.sec",
+        "JREE210ST1-S50011200.sec"
+    ]
+}

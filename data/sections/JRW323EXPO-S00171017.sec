@@ -1,0 +1,28 @@
+{
+    "prefix": "JRW323EXPO",
+    "section_id": "00171017",
+    "condition_type": "SPACE",
+    "condition_val": 1,
+    "pages": [
+        {
+            "duration": 1000,
+            "items": [
+                {
+                    "code": "0500",
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "code": "1110",
+                    "x": 64,
+                    "y": 0
+                },
+                {
+                    "code": "4001",
+                    "x": 144,
+                    "y": 0
+                }
+            ]
+        }
+    ]
+}

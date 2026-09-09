@@ -1,0 +1,28 @@
+{
+    "prefix": "JREE210ST1",
+    "section_id": "50011200",
+    "condition_type": "SPACE",
+    "condition_val": 1,
+    "pages": [
+        {
+            "duration": 3000,
+            "items": [
+                {
+                    "code": "2101",
+                    "x": 0,
+                    "y": 0
+                }
+            ]
+        },
+        {
+            "duration": 3000,
+            "items": [
+                {
+                    "code": "1112",
+                    "x": 0,
+                    "y": 0
+                }
+            ]
+        }
+    ]
+}
