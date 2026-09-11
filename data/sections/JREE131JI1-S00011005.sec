@@ -1,0 +1,48 @@
+{
+    "prefix": "JREE131JI1",
+    "section_id": "00011005",
+    "condition_type": "REPEAT",
+    "condition_val": 5,
+    "pages": [
+        {
+            "duration": 3100,
+            "items": [
+                {
+                    "code": "0500",
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "code": "2010",
+                    "x": 48,
+                    "y": 0
+                },
+                {
+                    "code": "5005",
+                    "x": 48,
+                    "y": 16
+                }
+            ]
+        },
+        {
+            "duration": 3100,
+            "items": [
+                {
+                    "code": "0500",
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "code": "5105",
+                    "x": 48,
+                    "y": 16
+                },
+                {
+                    "code": "3010",
+                    "x": 48,
+                    "y": 0
+                }
+            ]
+        }
+    ]
+}

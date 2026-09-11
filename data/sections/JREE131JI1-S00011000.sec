@@ -1,0 +1,23 @@
+{
+    "prefix": "JREE131JI1",
+    "section_id": "00011000",
+    "condition_type": "REPEAT",
+    "condition_val": 5,
+    "pages": [
+        {
+            "duration": 1000,
+            "items": [
+                {
+                    "code": "0500",
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "code": "1010",
+                    "x": 48,
+                    "y": 0
+                }
+            ]
+        }
+    ]
+}
