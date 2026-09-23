@@ -1,0 +1,23 @@
+{
+    "prefix": "KTR5000FC1",
+    "section_id": "10013400",
+    "condition_type": "REPEAT",
+    "condition_val": 5,
+    "pages": [
+        {
+            "duration": 2000,
+            "items": [
+                {
+                    "code": "0510",
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "code": "1134",
+                    "x": 48,
+                    "y": 0
+                }
+            ]
+        }
+    ]
+}
